@@ -1,7 +1,7 @@
 /* BGP Inbound Filter
   
   Purpose:
-     Allows BGP Connections inbound to a router with specified sources 
+     Allows BGP Connections from the specified sources to the router 
 
    References:
      RFC4271 - BGPv4 - https://datatracker.ietf.org/doc/html/rfc4271
