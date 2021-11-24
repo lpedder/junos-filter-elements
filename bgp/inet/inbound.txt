@@ -1,0 +1,22 @@
+/* BGP Inbound Filter
+  
+  Purpose:
+     Allows BGP Connections inbound to a router with specified sources 
+
+   References:
+     RFC4271 https://datatracker.ietf.org/doc/html/rfc4271
+
+term accept-bgp-inet-inbound {
+    from {
+        source-address {
+            // List of IPv4 BGP Sources
+        }
+        protocol tcp;
+        destination-port bgp;
+        ttl 255; // Optional - if using GTSM
+    }
+    then {
+        count accept-bgp-inet-inbound;
+        accept;
+    }
+}
