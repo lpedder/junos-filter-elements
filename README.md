@@ -1,7 +1,7 @@
 # JunOS Filter Elements
-Junos Filter Elemebts by Protocol
+Junos Filter Elements by Protocol
 
-These filter elements aim to provide RFC-referenced and compliant filtering. 
+These filter elements aim to provide RFC-referenced and compliant filtering. Typically used for Routing Engine Filtering.
 
 They use the principle of least privilege e.g. the filter elements are as specific as possible.
 
