@@ -1,0 +1,26 @@
+/* BGP Outbound Filter
+  
+  Purpose:
+     Allows BGP Connections established from the router to the specified sources 
+
+   References:
+     RFC4271 - BGPv4 - https://datatracker.ietf.org/doc/html/rfc4271
+     RFC5082 - GTSM - https://datatracker.ietf.org/doc/html/rfc5082
+     
+*/
+
+term accept-bgp-inet-outbound {
+    from {
+        source-address {
+            // List of IPv4 BGP Sources
+        }
+        protocol tcp;
+        source-port bgp;
+        destination-port 1025-65535; // Ephemeral - can tune depending on vendor
+        ttl 255; // Optional - if using GTSM
+    }
+    then {
+        count accept-bgp-inet-outbound;
+        accept;
+    }
+}
