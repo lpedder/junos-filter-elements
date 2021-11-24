@@ -1,0 +1,24 @@
+/* BGP IPv6 Inbound Filter
+  
+  Purpose:
+     Allows BGP Connections from the specified sources to the router 
+
+   References:
+     RFC4271 - BGPv4 - https://datatracker.ietf.org/doc/html/rfc4271
+     RFC5082 - GTSM - https://datatracker.ietf.org/doc/html/rfc5082
+*/
+
+term accept-bgp-inet6-inbound {
+    from {
+        source-address {
+            // List of IPv6 BGP Sources
+        }
+        payload-protocol tcp;
+        destination-port bgp;
+        hop-limit 255; // Optional - if using GTSM
+    }
+    then {
+        count accept-bgp-inet6-inbound;
+        accept;
+    }
+}
