@@ -4,8 +4,8 @@
      Allows BGP Connections inbound to a router with specified sources 
 
    References:
-     RFC4271 https://datatracker.ietf.org/doc/html/rfc4271
-
+     RFC4271 - BGPv4 - https://datatracker.ietf.org/doc/html/rfc4271
+     RFC5082 - GTSM - https://datatracker.ietf.org/doc/html/rfc5082
 */
 
 term accept-bgp-inet-inbound {
