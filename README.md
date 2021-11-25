@@ -12,4 +12,4 @@ Feedback and corrections welcome, please submit a pull request or open an issue 
 * [BGP](bgp) [inet](bgp/inet) [inet6](bgp/inet6)
 * [OSPF](ospf) [inet](ospf/inet) [inet6](ospf/inet6)
 * [VRRP](vrrp) [inet](vrrp/inet) [inet6](vrrp/inet6)
-* [ICMP](icmp) [inet6](icmp/inet6)
+* [ICMP](icmp) [inet](icmp/inet) [inet6](icmp/inet6)
