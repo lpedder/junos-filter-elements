@@ -17,3 +17,4 @@ Individual filter elements for each protocol
 * [OSPF](ospf) [inet](ospf/inet) [inet6](ospf/inet6)
 * [VRRP](vrrp) [inet](vrrp/inet) [inet6](vrrp/inet6)
 * [ICMP](icmp) [inet](icmp/inet) [inet6](icmp/inet6)
+* [BFD](bfd) [inet](bfd/inet) [inet6](bfd/inet6)
