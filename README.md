@@ -24,13 +24,15 @@ If you are sure your network does not need IP Options processing, then deal with
 In a properly dimensioned network, fragmentation should not occur between routers and management hosts.
 
 In IPv4, the first-fragment is easily identified:
- * Fragment ID is non-zero
  * More Fragments bit set to 1
  * Fragment Offset field set to 0
 
-If you are not doing fragment processing, then there is no point in completing further layer 3/4 matches on this packet. It needs to go, and accepting it will only take up reassembly buffer space. It should be immediately dropped. 
+If you are not doing fragment processing, then there is no point in completing further layer 3/4 matches on this packet. It needs to go, and accepting it will only take up reassembly buffer space. It should be immediately dropped.
 
-Because the RE filters are simply bitwise matching on the packet header, there is a theoretical possibility subsequent fragment payloads could match a filter term. So to be absolutely sure, any packet with a fragment ID and fragment offset should be immediately discarded before further terms are evaluated.
+Subsequent IPv4 Fragments will have:
+ * Fragment Offset field non-zero
+
+Because the RE filters are simply bitwise matching on the packet header, there is a theoretical possibility subsequent fragment payloads could match a firewall filter term. So to be absolutely sure, any packet with a non-zero fragment offset should be immediately discarded before further terms are evaluated.
 
  * [Discard Term for IPv4 Fragments](fragments/inet/input.conf)
 
