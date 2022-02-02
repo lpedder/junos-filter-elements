@@ -27,6 +27,7 @@ In IPv4, the first-fragment is easily identified:
  * Fragment ID is non-zero
  * More Fragments bit set to 1
  * Fragment Offset field set to 0
+
 If you are not doing fragment processing, then there is no point in completing further layer 3/4 matches on this packet. It needs to go, and accepting it will only take up reassembly buffer space. It should be immediately dropped. 
 
 For subsequent fragments, because the ASIC is bitwise matching on the packet header, there is a chance this may be accepted by a subsequent filter term. So to be absolutely sure, any packet with a fragment ID and fragment offset should be immediately discarded.
