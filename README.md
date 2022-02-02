@@ -21,7 +21,7 @@ If you are sure your network does not need IP Options processing, then deal with
 
 ### Fragments
 
-In a properly dimensioned network, fragmentation should not occur between routers and management hosts.
+In a properly dimensioned network, fragmentation should not occur to the router control plane.
 
 In IPv4, the first-fragment is easily identified:
  * More Fragments bit set to 1
