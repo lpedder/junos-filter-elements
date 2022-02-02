@@ -6,15 +6,15 @@ These filter elements aim to provide RFC-referenced and compliant filtering. The
 Feedback and corrections welcome, please submit a pull request or open an issue to discuss
 
 ## Thigs to decide First
-When constucting a lookback filter there are two questions that need to be answered first:
+When constucting a loopback filter there are two questions that need to be answered first:
  * Will your router need to process IP Options?
  * Will your router need to process fragments?
 
-These packets are punted to the RE and a possible attack vector.
+These packets are punted to the RE and a possible attack vector. If you don't need these packets on your router, discard them first.
 
 ### IP Options
 
-If your network runs RSVP on an older version of JunOS <15.2 or uses multiple vendors then perhaps it relies upon the IP Options Router Alert bit. Upon receipt of an packet with this bit set, the router will punt it to the RE, opening a possible attack vector. If you run RSVP the chances are it now uses RFC2961 refresh reduction which prohibits the use of the Router Alert bit in bundled messages.
+If your network runs RSVP on an older version of JunOS <15.2 (or uses multiple vendors) then perhaps it relies upon the IP Options Router Alert bit. Upon receipt of an packet with this bit set, the router will punt it to the RE, opening a possible attack vector. If you run RSVP the chances are it now uses RFC2961 refresh reduction which prohibits the use of the Router Alert bit in bundled messages.
 
 If you are sure your network does not need IP Options processing, then deal with this first.
  * [Discard Term for IPv4 Options](options/inet/input.conf)
@@ -30,7 +30,7 @@ In IPv4, the first-fragment is easily identified:
 
 If you are not doing fragment processing, then there is no point in completing further layer 3/4 matches on this packet. It needs to go, and accepting it will only take up reassembly buffer space. It should be immediately dropped. 
 
-For subsequent fragments, because the ASIC is bitwise matching on the packet header, there is a chance this may be accepted by a subsequent filter term. So to be absolutely sure, any packet with a fragment ID and fragment offset should be immediately discarded.
+Because the RE filters are simply bitwise matching on the packet header, there is a theoretical possibility subsequent fragment payloads could match a filter term. So to be absolutely sure, any packet with a fragment ID and fragment offset should be immediately discarded before further terms are evaluated.
 
  * [Discard Term for IPv4 Fragments](fragments/inet/input.conf)
 
