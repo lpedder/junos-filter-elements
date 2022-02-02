@@ -5,10 +5,37 @@ These filter elements aim to provide RFC-referenced and compliant filtering. The
 
 Feedback and corrections welcome, please submit a pull request or open an issue to discuss
 
-## Junk
-Things that should be blocked as early as possible, and will never be processed by the device.
+## Thigs to decide First
+When constucting a lookback filter there are two questions that need to be answered first:
+ * Will your router need to process IP Options?
+ * Will your router need to process fragments?
 
- * [inet](junk/inet) [inet6](junk/inet6)
+These packets are punted to the RE and a possible attack vector.
+
+### IP Options
+
+If your network runs RSVP on an old version of JunOS or uses multiple vendors then perhaps it relies upon the IP Options Router Alert bit. Upon receipt of an packet with this bit set, the router will punt it to the RE, opening a possible attack vector. If you run RSVP the chances are it now uses RFC2961 refresh reduction which prohibits the use of the Router Alert bit in bundled messages.
+
+If you are sure your network does not need IP Options processing, then deal with this first.
+ * [Discard Term for IPv4 Options](options/inet/input.conf)
+
+### Fragments
+
+In a properly dimensioned network, fragmentation should not occur between routers and management hosts.
+
+In IPv4, the first-fragment is easily identified:
+ * Fragment ID is non-zero
+ * More Fragments bit set to 1
+ * Fragment Offset field set to 0
+If you are not doing fragment processing, then there is no point in completing further layer 3/4 matches on this packet. It needs to go, and accepting it will only take up reassembly buffer space. It should be immediately dropped. 
+
+For subsequent fragments, because the ASIC is bitwise matching on the packet header, there is a chance this may be accepted by a subsequent filter term. So to be absolutely sure, any packet with a fragment ID and fragment offset should be immediately discarded.
+
+ * [Discard Term for IPv4 Fragments](fragments/inet/input.conf)
+
+With IPv6, because all fragments are placed in fragment headers, they can be identified by the next-header value being set to fragment (44).
+
+When constructing an IPv6 RE filter, it is safer to accept on next-header. The next header cannot be bypassed and typically everything else gets dropped at the end. So if you have a long list of next-header accept terms, and then a discard term at the end, IPv6 fragments will be safely dropped here.
 
 ## Protocols
 Individual filter elements for each protocol
