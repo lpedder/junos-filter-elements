@@ -36,9 +36,10 @@ Because the RE filters are simply bitwise matching on the packet header, there i
 
  * [Discard Term for IPv4 Fragments](fragments/inet/input.conf)
 
-With IPv6, because all fragments are placed in fragment headers, they can be identified by the next-header value being set to fragment (44).
+With IPv6, because all fragments are placed in fragment headers, they can be identified easily:
+ * next-header value set to fragment (44).
 
-When constructing an IPv6 RE filter, it is safer to accept on next-header. The next header cannot be bypassed and typically everything else gets dropped at the end. So if you have a long list of next-header accept terms, and then a discard term at the end, IPv6 fragments will be safely dropped here.
+When constructing an IPv6 RE filter, it is safer to accept on next-header. The next header cannot be bypassed and typically everything else gets dropped at the final term. So if you have a long list of next-header accept terms, and then a discard term at the end, IPv6 fragments will be safely dropped here.
 
 ## Protocols
 Individual filter elements for each protocol
