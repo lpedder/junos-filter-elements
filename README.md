@@ -5,7 +5,7 @@ These filter elements aim to provide RFC-referenced and compliant filtering. The
 
 Feedback and corrections welcome, please submit a pull request or open an issue to discuss
 
-## Thigs to decide First
+## Things to decide First
 When constucting a loopback filter there are two questions that need to be answered first:
  * Will your router need to process IP Options?
  * Will your router need to process fragments?
@@ -39,32 +39,95 @@ Because the RE filters are simply bitwise matching on the packet header, there i
 With IPv6, because all fragments are placed in fragment headers, they can be identified easily:
  * next-header value set to fragment (44).
 
-When constructing an IPv6 RE filter, it is safer to accept on next-header. The next header cannot be bypassed and typically everything else gets dropped at the final term. So if you have a long list of next-header accept terms, and then a discard term at the end, IPv6 fragments will be safely dropped here.
+For IPv6 RE filtering, it is safer to accept on next-header. The next-header match cannot be bypassed and typically everything else gets dropped at the final term. So if you have a long list of next-header accept terms and a discard term at the end, IPv6 fragments will be safely dropped here.
 
 ## General Approach
 
-When constructing a firewall filter it can quickly get complex. If you use abstraction to multiple levels this can make it more difficult to read. For this reason, the examples here don't refer to prefix lists or other filters. This makes it clearer what is allowed for each protocol. There are also problems with using prefix lists:
+Creating RE filters is by no means easy. They are *stateless* filters which can be a challenge for engineers used to working with stateful firewall policies. This task requires
+ * Understanding to *packet level* of protocols in use on the network
+ * Knowledge of all network addressing
+ * Knowledge of how edge filtering must work in conjunction with RE filters for effective protection
+
+There are some common pitfalls, so the general approach taken here in building the elements is detailed here.
+
+### Use of Prefix-Lists and Apply-Paths
+When constructing a firewall filter it can quickly get complex. If you use abstraction to multiple levels this can make it more difficult to read. For this reason, the examples here don't refer to prefix lists or other filters. This makes what is allowed for each protocol clearer. There are other problems with using prefix lists:
  * The temptation to re-use them can mean your filters aren't as specific as they could be
  * Using JunOS apply-path wildcards in prefix lists can open your filter much wider than you expect
 
-In the case of an apply-path wildcard such as this:
+In the case of a commonly used apply-path wildcard such as this:
 ```
     prefix-list router-ipv4 {
         apply-path "interfaces <*> unit <*> family inet address <*>";
     }
 ```
-You might think that the result will be the /32 addresses of each interface. But this actually takes the subnet of the interface. This can be danegerous if you are connected to a large peering LAN for example. All the peers would potentially be permitted by your filters referring to this prefix-list!
+You might think that the result will be the /32 addresses of each interface. But this actually takes the full subnet of the interfaces as you can see below:
+```
+user@router> show configuration policy-options prefix-list router-ipv4 | display inheritance
+##
+## apply-path was expanded to:
+##     172.16.24.0/27;
+##     172.16.24.128/29;
+##     203.0.113.0/24;
+##
+apply-path "interfaces <*> unit <*> family inet address <*>";
+```
+This can be danegerous if you are connected to a large peering LAN for example. All the peers would potentially be permitted by your filters referring to this prefix-list!
 
-Know exactly what you are permitting and where you are permitting it.
+Better to know exactly what you are permitting and where you are permitting it from. This is particularly true when using GTSM on BGP peers, which relies on correct filtering based on TTL values.
+
+### Always Match Source IPs
+
+There are only two things that should normally be permitted to the router from anywhere:
+ * ICMP for essential operations
+ * Traceroute (UDP unix-style)
+
+Everything else should be matched on source IPs.
+
+## Never Match on Port
+
+When it comes to matching port numbers, JunOS allows you use three match conditions:
+ * **port** - Which matches on either source or destination port
+ * **source-port** - Matches only the source port
+ * **destination-port** - Matches only the destination port
+
+A common pitfall is to match only using **port**. The problem here is best explained with an example. In the following filter term:
+```
+    term accept-bgp {
+        from {
+            source-address {
+                198.51.0.1/32;
+            }
+            protocol tcp;
+            port bgp;
+        }
+        then {
+            count accept-bgp;
+            accept;
+        }
+    }
+```
+The remote BGP peer 198.51.0.1 would be able to establish a TCP connection to this router on any destination port simply by setting the source port to 179. This would allow access to port 22 (SSH) for example, exposing a potential attack surface.
+
+For BGP, the filter should be two terms. Each term matches for one direction as either end can initiate a BGP session. You can see this in the elements provided below.
+
+## Also Match on Destination IP If Possible
+
+Following the principle of least privilege, if there is a way to further restrict a filter term to a known destination IP then it should be used. This is particularly important if your network uses L3VPNs. Because VPN customers may be using the same source IP addresses you have permitted, the destination address should also be matched on a filter term.
+
+## Restrict TTLs Where Specified in RFCs
+
+If an RFC states a protocol MUST set a TTL or hop-limit value for a packet type, then this can help to further limit access in a filter term. For example in IPv6 Neighbor Discovery, the hop-limit value is set to 255. This should be matched in the filter term for ND packets.
 
 ## Protocols
-Individual filter elements for each protocol
+Here are individual filter elements for each protocol, with references provided to RFCs and documentation.
 
 * [BGP](bgp) [inet](bgp/inet) [inet6](bgp/inet6)
 * [OSPF](ospf) [inet](ospf/inet) [inet6](ospf/inet6)
 * [VRRP](vrrp) [inet](vrrp/inet) [inet6](vrrp/inet6)
 * [ICMP](icmp) [inet](icmp/inet) [inet6](icmp/inet6)
 * [RSVP](rsvp) [inet](rsvp/inet)
+* [LDP](ldp) [inet](ldp/inet)
 * [BFD](bfd) [inet](bfd/inet) [inet6](bfd/inet6)
 
 ## Management Protocols
@@ -72,3 +135,5 @@ Individual filter elements for each management protocol
 
 * [SSH](ssh)
 * [SNMP](snmp)
+* [NTP](ntp)
+* [Traceroute](traceroute) [inet](traceroute/inet)
