@@ -43,8 +43,8 @@ When constructing an IPv6 RE filter, it is safer to accept on next-header. The n
 
 ## General Approach
 
-When constructing a firewall filter it can quickly get complex. If you use abstraction to multiple levels this can make it more difficult to read. For this reason, the examples here don't refer to prefix lists to make it clear what is allowed for each protocol. There are also problems with using prefix lists:
- * The temptation to re-use them can weaken your filters
+When constructing a firewall filter it can quickly get complex. If you use abstraction to multiple levels this can make it more difficult to read. For this reason, the examples here don't refer to prefix lists or other filters. This makes it clearer what is allowed for each protocol. There are also problems with using prefix lists:
+ * The temptation to re-use them can mean your filters aren't as specific as they could be
  * Using JunOS apply-path wildcards in prefix lists can open your filter much wider than you expect
 
 In the case of an apply-path wildcard such as this:
