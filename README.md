@@ -41,6 +41,22 @@ With IPv6, because all fragments are placed in fragment headers, they can be ide
 
 When constructing an IPv6 RE filter, it is safer to accept on next-header. The next header cannot be bypassed and typically everything else gets dropped at the final term. So if you have a long list of next-header accept terms, and then a discard term at the end, IPv6 fragments will be safely dropped here.
 
+## General Approach
+
+When constructing a firewall filter it can quickly get complex. If you use abstraction to multiple levels this can make it more difficult to read. For this reason, the examples here don't refer to prefix lists to make it clear what is allowed for each protocol. There are also problems with using prefix lists:
+ * The temptation to re-use them can weaken your filters
+ * Using JunOS apply-path wildcards in prefix lists can open your filter much wider than you expect
+
+In the case of an apply-path wildcard such as this:
+```
+    prefix-list router-ipv4 {
+        apply-path "interfaces <*> unit <*> family inet address <*>";
+    }
+```
+You might think that the result will be the /32 addresses of each interface. But this actually takes the subnet of the interface. This can be danegerous if you are connected to a large peering LAN for example. All the peers would potentially be permitted by your filters referring to this prefix-list!
+
+Know exactly what you are permitting and where you are permitting it.
+
 ## Protocols
 Individual filter elements for each protocol
 
